@@ -138,7 +138,10 @@ A simplified API for running a single benchmark evaluation, similar to Llama Sta
 ```json
 POST /api/v1/evaluations/benchmarks/lm_evaluation_harness/blimp
 {
-  "model_name": "gpt-4o-mini",
+  "model": {
+    "server": "vllm",
+    "name": "gpt-4o-mini"
+  },
   "model_configuration": {
     "temperature": 0.0,
     "max_tokens": 512
@@ -157,7 +160,7 @@ POST /api/v1/evaluations/benchmarks/lm_evaluation_harness/blimp
 **Request Parameters**:
 - `provider_id` (path): The provider identifier (e.g., `lm_evaluation_harness`)
 - `benchmark_id` (path): The benchmark identifier (e.g., `blimp`)
-- `model_name` (body, required): Model to evaluate
+- `model` (body, required): Model specification object with `server` and `name` fields
 - `model_configuration` (body, required): Model configuration parameters
 - `timeout_minutes` (body, optional): Evaluation timeout in minutes (default: 60)
 - `retry_attempts` (body, optional): Number of retry attempts (default: 3)

@@ -5,7 +5,8 @@ from typing import Any
 from ..core.exceptions import BackendError
 from ..models.evaluation import BackendType
 from .base import Executor
-from .nemo_evaluator import NemoEvaluatorExecutor
+from .lmeval import LMEvalExecutor
+from .nemo import NemoEvaluatorExecutor
 
 
 class ExecutorFactory:
@@ -13,6 +14,7 @@ class ExecutorFactory:
 
     _EXECUTOR_REGISTRY: dict[str, type[Executor]] = {
         BackendType.NEMO_EVALUATOR.value: NemoEvaluatorExecutor,
+        BackendType.LMEVAL.value: LMEvalExecutor,
     }
 
     @classmethod

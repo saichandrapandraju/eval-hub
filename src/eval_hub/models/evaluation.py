@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 def get_utc_now() -> datetime:
@@ -111,8 +111,9 @@ class SingleBenchmarkEvaluationRequest(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    model_server_id: str = Field(..., description="Model server identifier")
-    model_name: str = Field(..., description="Name of the model on the server")
+    model: dict[str, Any] = Field(
+        ..., description="Model specification with 'server' and 'name' fields"
+    )
     model_configuration: dict[str, Any] = Field(
         default_factory=dict, description="Model configuration"
     )
@@ -126,6 +127,25 @@ class SingleBenchmarkEvaluationRequest(BaseModel):
     tags: dict[str, str] = Field(
         default_factory=dict, description="Tags for the evaluation run"
     )
+
+    @property
+    def model_server_id(self) -> str:
+        """Get model server ID from nested model object."""
+        return self.model.get("server", "")
+
+    @property
+    def model_name(self) -> str:
+        """Get model name from nested model object."""
+        return self.model.get("name", "")
+
+    @model_validator(mode="after")
+    def validate_model_fields(self) -> "SingleBenchmarkEvaluationRequest":
+        """Validate that model object contains required 'server' and 'name' fields."""
+        if "server" not in self.model:
+            raise ValueError("model.server is required")
+        if "name" not in self.model:
+            raise ValueError("model.name is required")
+        return self
 
 
 class EvaluationRequest(BaseModel):

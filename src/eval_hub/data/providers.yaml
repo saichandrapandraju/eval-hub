@@ -5,6 +5,19 @@ providers:
   provider_type: builtin
   base_url: null
   benchmarks:
+  - benchmark_id: arc_easy
+    name: ARC Easy
+    description: ARC Easy evaluation benchmark - AI2 Reasoning Challenge (Easy)
+    category: reasoning
+    metrics:
+    - accuracy
+    - acc_norm
+    num_few_shot: 0
+    dataset_size: 2376
+    tags:
+    - reasoning
+    - science
+    - lm_eval
   - benchmark_id: AraDiCE_boolq_lev
     name: Aradice Boolq Lev
     description: Aradice Boolq Lev evaluation benchmark

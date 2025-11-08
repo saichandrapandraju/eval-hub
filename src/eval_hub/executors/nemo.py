@@ -1,4 +1,4 @@
-"""NeMo Evaluator executor for remote @Evaluator container integration."""
+"""NeMo Evaluator executor for remote Evaluator container integration."""
 
 import asyncio
 import json
@@ -12,7 +12,7 @@ import httpx
 from ..core.exceptions import BackendError
 from ..core.logging import get_logger
 from ..models.evaluation import EvaluationResult, EvaluationStatus
-from ..models.nemo_evaluator import (
+from ..models.nemo import (
     EndpointType,
     NemoApiEndpoint,
     NemoConfigParams,

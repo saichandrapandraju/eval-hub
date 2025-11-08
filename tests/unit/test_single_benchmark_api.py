@@ -139,7 +139,7 @@ class TestSingleBenchmarkEvaluation:
         client, mock_service = client_with_mock_provider
 
         request_data = {
-            "model_name": "gpt-4o-mini",
+            "model": {"server": "vllm", "name": "gpt-4o-mini"},
             "model_configuration": {"temperature": 0.0, "max_tokens": 512},
             "timeout_minutes": 30,
             "retry_attempts": 1,
@@ -170,7 +170,7 @@ class TestSingleBenchmarkEvaluation:
         """Test creation with minimal required fields."""
         client, _ = client_with_mock_provider
 
-        request_data = {"model_name": "gpt-4o-mini", "model_configuration": {}}
+        request_data = {"model": {"server": "vllm", "name": "gpt-4o-mini"}, "model_configuration": {}}
 
         response = client.post(
             "/api/v1/evaluations/benchmarks/lm_evaluation_harness/blimp",
@@ -189,7 +189,7 @@ class TestSingleBenchmarkEvaluation:
 
         mock_service.get_benchmark_by_id.return_value = None
 
-        request_data = {"model_name": "gpt-4o-mini", "model_configuration": {}}
+        request_data = {"model": {"server": "vllm", "name": "gpt-4o-mini"}, "model_configuration": {}}
 
         response = client.post(
             "/api/v1/evaluations/benchmarks/lm_evaluation_harness/nonexistent",
@@ -208,7 +208,7 @@ class TestSingleBenchmarkEvaluation:
 
         mock_service.get_provider_by_id.return_value = None
 
-        request_data = {"model_name": "gpt-4o-mini", "model_configuration": {}}
+        request_data = {"model": {"server": "vllm", "name": "gpt-4o-mini"}, "model_configuration": {}}
 
         response = client.post(
             "/api/v1/evaluations/benchmarks/nonexistent_provider/blimp",
@@ -226,7 +226,7 @@ class TestSingleBenchmarkEvaluation:
         client, _ = client_with_mock_provider
 
         request_data = {
-            "model_name": "gpt-4o-mini",
+            "model": {"server": "vllm", "name": "gpt-4o-mini"},
             "model_configuration": {
                 "temperature": 0.1,
                 "max_tokens": 256,
@@ -249,10 +249,10 @@ class TestSingleBenchmarkEvaluation:
         data = response.json()
         assert "request_id" in data
 
-    def test_create_single_benchmark_evaluation_missing_model_name(
+    def test_create_single_benchmark_evaluation_missing_model(
         self, client_with_mock_provider
     ):
-        """Test error when model_name is missing."""
+        """Test error when model is missing."""
         client, _ = client_with_mock_provider
 
         request_data = {"model_configuration": {}}
@@ -298,7 +298,7 @@ class TestSingleBenchmarkEvaluation:
         mock_service.get_benchmark_by_id.return_value = nemo_benchmark
         mock_service.get_provider_by_id.return_value = nemo_provider
 
-        request_data = {"model_name": "test-model", "model_configuration": {}}
+        request_data = {"model": {"server": "vllm", "name": "test-model"}, "model_configuration": {}}
 
         response = client.post(
             "/api/v1/evaluations/benchmarks/nemo_evaluator/test_benchmark",

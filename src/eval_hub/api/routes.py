@@ -167,16 +167,15 @@ async def create_single_benchmark_evaluation(
             detail=f"Provider {provider_id} not found",
         )
 
-    # Map provider type to backend type
-    backend_type_map = {
-        ProviderType.BUILTIN: BackendType.LMEVAL,
-        ProviderType.NEMO_EVALUATOR: BackendType.NEMO_EVALUATOR,
-    }
-    backend_type = backend_type_map.get(provider.provider_type)
-    if not backend_type:
+    # Map provider type and ID to backend type
+    if provider.provider_type == ProviderType.BUILTIN and provider_id == "lm_evaluation_harness":
+        backend_type = BackendType.LMEVAL
+    elif provider.provider_type == ProviderType.NEMO_EVALUATOR:
+        backend_type = BackendType.NEMO_EVALUATOR
+    else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported provider type: {provider.provider_type}",
+            detail=f"Unsupported provider type: {provider.provider_type} (provider_id: {provider_id})",
         )
 
     # Build benchmark config
@@ -202,9 +201,9 @@ async def create_single_benchmark_evaluation(
         evaluations=[
             EvaluationSpec(
                 name=f"{benchmark.name} Evaluation",
-                description=f"Evaluation of {request.model_server_id}::{request.model_name} on {benchmark.name}",
-                model_server_id=request.model_server_id,
-                model_name=request.model_name,
+                description=f"Evaluation of {request.model['server']}::{request.model['name']} on {benchmark.name}",
+                model_server_id=request.model["server"],
+                model_name=request.model["name"],
                 model_configuration=request.model_configuration,
                 backends=[
                     BackendSpec(
@@ -238,7 +237,7 @@ async def create_single_benchmark_evaluation(
         # Parse and validate the request
         parsed_request = await parser.parse_evaluation_request(evaluation_request)
 
-        # Create MLFlow experiment
+        # Create MLFlow experiment (mocked)
         experiment_id = await mlflow_client.create_experiment(parsed_request)
         experiment_url = await mlflow_client.get_experiment_url(experiment_id)
 
@@ -334,7 +333,7 @@ async def create_evaluation(
         # Parse and validate the request
         parsed_request = await parser.parse_evaluation_request(request)
 
-        # Create MLFlow experiment
+        # Create MLFlow experiment (mocked)
         experiment_id = await mlflow_client.create_experiment(parsed_request)
         experiment_url = await mlflow_client.get_experiment_url(experiment_id)
 
@@ -906,7 +905,7 @@ async def _execute_evaluation_async(
         # Execute evaluations
         results = await executor.execute_evaluation_request(request, progress_callback)
 
-        # Log results to MLFlow
+        # Log results to MLFlow (mocked)
         for result in results:
             if result.mlflow_run_id:
                 await mlflow_client.log_evaluation_result(result)
@@ -951,7 +950,7 @@ async def _execute_evaluation_sync(
     # Execute evaluations
     results = await executor.execute_evaluation_request(request)
 
-    # Log results to MLFlow
+    # Log results to MLFlow (mocked)
     for result in results:
         if result.mlflow_run_id:
             await mlflow_client.log_evaluation_result(result)
