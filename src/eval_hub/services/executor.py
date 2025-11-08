@@ -1,46 +1,43 @@
 """Evaluation executor service for orchestrating evaluation runs."""
 
 import asyncio
-import json
+import builtins
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
+from collections.abc import Callable
+from datetime import datetime
 from uuid import UUID
 
-import httpx
-from pydantic import BaseModel
-
 from ..core.config import Settings
-from ..core.exceptions import ExecutionError, TimeoutError, BackendError
-from ..core.logging import get_logger, log_evaluation_start, log_evaluation_complete
+from ..core.exceptions import BackendError, TimeoutError
+from ..core.logging import get_logger, log_evaluation_complete, log_evaluation_start
+from ..executors import ExecutionContext, ExecutorFactory
 from ..models.evaluation import (
-    EvaluationRequest,
-    EvaluationSpec,
-    EvaluationResult,
-    EvaluationStatus,
     BackendSpec,
     BenchmarkSpec,
+    EvaluationRequest,
+    EvaluationResult,
+    EvaluationSpec,
+    EvaluationStatus,
 )
 from ..models.status import TaskInfo, TaskStatus
-from ..executors import ExecutorFactory, ExecutionContext
 from ..services.model_service import ModelService
 
 
 class EvaluationExecutor:
     """Service for executing and monitoring evaluations."""
 
-    def __init__(self, settings: Settings, model_service: Optional[ModelService] = None):
+    def __init__(self, settings: Settings, model_service: ModelService | None = None):
         self.settings = settings
         self.logger = get_logger(__name__)
         self.model_service = model_service
-        self.active_tasks: Dict[str, TaskInfo] = {}
+        self.active_tasks: dict[str, TaskInfo] = {}
         self.execution_semaphore = asyncio.Semaphore(settings.max_concurrent_evaluations)
 
     async def execute_evaluation_request(
         self,
         request: EvaluationRequest,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
-    ) -> List[EvaluationResult]:
+        progress_callback: Callable[[str, float, str], None] | None = None
+    ) -> list[EvaluationResult]:
         """Execute all evaluations in a request."""
         self.logger.info(
             "Starting evaluation request execution",
@@ -90,8 +87,8 @@ class EvaluationExecutor:
     async def _execute_single_evaluation(
         self,
         evaluation: EvaluationSpec,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
-    ) -> List[EvaluationResult]:
+        progress_callback: Callable[[str, float, str], None] | None = None
+    ) -> list[EvaluationResult]:
         """Execute a single evaluation across all its backends."""
         log_evaluation_start(
             self.logger,
@@ -171,8 +168,8 @@ class EvaluationExecutor:
         self,
         evaluation: EvaluationSpec,
         backend: BackendSpec,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
-    ) -> List[EvaluationResult]:
+        progress_callback: Callable[[str, float, str], None] | None = None
+    ) -> list[EvaluationResult]:
         """Execute all benchmarks for a specific backend."""
         self.logger.info(
             "Starting backend execution",
@@ -217,7 +214,7 @@ class EvaluationExecutor:
         evaluation: EvaluationSpec,
         backend: BackendSpec,
         benchmark: BenchmarkSpec,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Execute a single benchmark on a specific backend."""
         async with self.execution_semaphore:
@@ -306,7 +303,7 @@ class EvaluationExecutor:
     async def _execute_benchmark_with_timeout(
         self,
         context: ExecutionContext,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Execute a benchmark with timeout handling."""
         timeout_seconds = context.timeout_minutes * 60
@@ -317,7 +314,7 @@ class EvaluationExecutor:
                 timeout=timeout_seconds
             )
             return result
-        except asyncio.TimeoutError:
+        except builtins.TimeoutError:
             raise TimeoutError(
                 f"Benchmark execution timed out after {context.timeout_minutes} minutes"
             )
@@ -325,7 +322,7 @@ class EvaluationExecutor:
     async def _execute_benchmark_impl(
         self,
         context: ExecutionContext,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Implementation of benchmark execution using the executor pattern."""
 
@@ -426,7 +423,7 @@ class EvaluationExecutor:
     async def _execute_lm_eval_harness(
         self,
         context: ExecutionContext,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Execute evaluation using lm-evaluation-harness."""
         # Simulate execution time
@@ -463,7 +460,7 @@ class EvaluationExecutor:
     async def _execute_guidellm(
         self,
         context: ExecutionContext,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Execute evaluation using GuideLL."""
         # Simulate execution time
@@ -501,7 +498,7 @@ class EvaluationExecutor:
     async def _execute_custom_backend(
         self,
         context: ExecutionContext,
-        progress_callback: Optional[Callable[[str, float, str], None]] = None
+        progress_callback: Callable[[str, float, str], None] | None = None
     ) -> EvaluationResult:
         """Execute evaluation using a custom backend."""
         # For custom backends, we would make HTTP requests to their APIs
@@ -533,7 +530,7 @@ class EvaluationExecutor:
             duration_seconds=(datetime.utcnow() - context.started_at).total_seconds(),
         )
 
-    async def get_active_evaluations(self) -> List[TaskInfo]:
+    async def get_active_evaluations(self) -> list[TaskInfo]:
         """Get list of currently active evaluations."""
         return list(self.active_tasks.values())
 
@@ -550,7 +547,7 @@ class EvaluationExecutor:
             return True
         return False
 
-    async def get_evaluation_status(self, evaluation_id: UUID) -> Optional[TaskInfo]:
+    async def get_evaluation_status(self, evaluation_id: UUID) -> TaskInfo | None:
         """Get status of a specific evaluation."""
         task_id = str(evaluation_id)
         return self.active_tasks.get(task_id)
