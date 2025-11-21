@@ -1,22 +1,19 @@
 """Base class for executors with experiment tracking integration."""
 
 from abc import ABC
-from typing import Any, Callable
-from uuid import UUID
+from typing import Any
 
-from ..core.exceptions import BackendError
 from ..core.logging import get_logger
 from ..models.evaluation import (
     EvaluationRequest,
-    EvaluationSpec,
     EvaluationResult,
+    EvaluationSpec,
     EvaluationStatus,
     ExperimentConfig,
     Model,
 )
-from ..services.mlflow_client import MLFlowClient
 from ..utils.datetime_utils import utcnow
-from .base import Executor, ExecutionContext
+from .base import ExecutionContext, Executor
 
 
 class TrackedExecutor(Executor, ABC):
