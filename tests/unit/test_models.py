@@ -324,7 +324,6 @@ class TestEvaluationModels:
         assert request.experiment.tags["environment"] == "production"
         assert request.experiment.tags["model_family"] == "llama-3.1"
         assert request.experiment.tags["evaluation_type"] == "reasoning"
-        assert isinstance(request.request_id, type(uuid4()))
         assert isinstance(request.created_at, datetime)
 
     def test_simple_evaluation_request_defaults(self):
@@ -344,5 +343,4 @@ class TestEvaluationModels:
         assert request.retry_attempts == 3
         assert request.async_mode is True
         assert request.callback_url is None
-        assert isinstance(request.request_id, type(uuid4()))
         assert isinstance(request.created_at, datetime)

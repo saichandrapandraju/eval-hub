@@ -148,7 +148,6 @@ class EvaluationSpec(BaseModel):
         return self.model.name
 
 
-
 class EvaluationRequest(BaseModel):
     """Request payload for starting evaluations."""
 
@@ -190,7 +189,6 @@ class SimpleEvaluationRequest(BaseModel):
     retry_attempts: int = Field(
         default=3, description="Number of retry attempts on failure"
     )
-    request_id: UUID = Field(default_factory=uuid4, description="Unique request ID")
     async_mode: bool = Field(
         default=True, description="Whether to run evaluations asynchronously"
     )

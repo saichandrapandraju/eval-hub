@@ -3,7 +3,7 @@
 import asyncio
 import time
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import (
     APIRouter,
@@ -138,9 +138,12 @@ async def create_evaluation(
     provider_service: ProviderService = Depends(get_provider_service),
 ) -> EvaluationResponse:
     """Create and execute evaluation request using the simplified benchmark schema."""
+    # Generate a unique request ID for this evaluation
+    request_id = uuid4()
+
     logger.info(
         "Received evaluation request",
-        request_id=str(request.request_id),
+        request_id=str(request_id),
         benchmark_count=len(request.benchmarks),
         experiment_name=request.experiment.name,
         async_mode=request.async_mode,
@@ -220,7 +223,7 @@ async def create_evaluation(
             backend_specs.append(backend_spec)
 
         evaluation_spec = EvaluationSpec(
-            name=request.experiment.name or f"Evaluation-{request.request_id.hex[:8]}",
+            name=request.experiment.name or f"Evaluation-{request_id.hex[:8]}",
             description=f"Evaluation with {len(request.benchmarks)} benchmarks",
             model=request.model,
             backends=backend_specs,
@@ -232,7 +235,7 @@ async def create_evaluation(
 
         # Create legacy evaluation request
         legacy_request = EvaluationRequest(
-            request_id=request.request_id,
+            request_id=request_id,
             evaluations=[evaluation_spec],
             experiment=request.experiment,
             async_mode=request.async_mode,
@@ -262,7 +265,7 @@ async def create_evaluation(
             initial_response.total_evaluations = len(request.benchmarks)
 
             # Store in active evaluations
-            active_evaluations[str(request.request_id)] = initial_response
+            active_evaluations[str(request_id)] = initial_response
 
             # Start background task
             task = asyncio.create_task(
@@ -275,7 +278,7 @@ async def create_evaluation(
                     response_builder,
                 )
             )
-            evaluation_tasks[str(request.request_id)] = task
+            evaluation_tasks[str(request_id)] = task
 
             return initial_response
 
@@ -295,7 +298,7 @@ async def create_evaluation(
     except ValidationError as e:
         logger.error(
             "Validation failed for evaluation request",
-            request_id=str(request.request_id),
+            request_id=str(request_id),
             error=str(e),
         )
         raise HTTPException(
@@ -306,7 +309,7 @@ async def create_evaluation(
     except Exception as e:
         logger.error(
             "Failed to create evaluation",
-            request_id=str(request.request_id),
+            request_id=str(request_id),
             error=str(e),
         )
         raise HTTPException(

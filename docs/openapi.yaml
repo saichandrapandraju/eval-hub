@@ -1054,11 +1054,6 @@ components:
           title: Retry Attempts
           description: Number of retry attempts on failure
           default: 3
-        request_id:
-          type: string
-          format: uuid
-          title: Request Id
-          description: Unique request ID
         async_mode:
           type: boolean
           title: Async Mode
