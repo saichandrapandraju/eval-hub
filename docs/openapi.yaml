@@ -514,7 +514,7 @@ components:
           title: Config
           description: Benchmark configuration including num_fewshot, limit, batch_size,
             etc.
-      additionalProperties: true
+      additionalProperties: false
       type: object
       required:
       - benchmark_id
@@ -877,7 +877,7 @@ components:
           type: object
           title: Tags
           description: Tags for the evaluation experiment
-      additionalProperties: true
+      additionalProperties: false
       type: object
       required:
       - name
@@ -1010,7 +1010,7 @@ components:
           type: string
           title: Name
           description: Model name/identifier
-      additionalProperties: true
+      additionalProperties: false
       type: object
       required:
       - url
@@ -1070,7 +1070,12 @@ components:
           format: date-time
           title: Created At
           description: Request creation timestamp
-      additionalProperties: true
+        custom:
+          additionalProperties: true
+          type: object
+          title: Custom
+          description: Custom fields for additional request data
+      additionalProperties: false
       type: object
       required:
       - model

@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class Model(BaseModel):
     """Model specification for evaluation requests."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
     url: str = Field(..., description="Model endpoint URL")
     name: str = Field(..., description="Model name/identifier")
@@ -43,7 +43,7 @@ class BackendType(str, Enum):
 class ExperimentConfig(BaseModel):
     """Configuration for MLFlow experiment tracking."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
     name: str = Field(..., description="Experiment name for MLFlow tracking")
     tags: dict[str, str] = Field(
@@ -80,7 +80,7 @@ class BenchmarkSpec(BaseModel):
 class BenchmarkConfig(BaseModel):
     """New simplified benchmark specification."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
     benchmark_id: str = Field(..., description="Benchmark identifier")
     provider_id: str = Field(..., description="Provider identifier")
@@ -174,7 +174,7 @@ class EvaluationRequest(BaseModel):
 class SimpleEvaluationRequest(BaseModel):
     """Simplified evaluation request using the new schema."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
     model: Model = Field(..., description="Model specification for evaluation")
     benchmarks: list[BenchmarkConfig] = Field(
@@ -197,6 +197,9 @@ class SimpleEvaluationRequest(BaseModel):
     )
     created_at: datetime = Field(
         default_factory=get_utc_now, description="Request creation timestamp"
+    )
+    custom: dict[str, Any] = Field(
+        default_factory=dict, description="Custom fields for additional request data"
     )
 
 

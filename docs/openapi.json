@@ -793,7 +793,7 @@
             "description": "Benchmark configuration including num_fewshot, limit, batch_size, etc."
           }
         },
-        "additionalProperties": true,
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "benchmark_id",
@@ -1345,7 +1345,7 @@
             "description": "Tags for the evaluation experiment"
           }
         },
-        "additionalProperties": true,
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "name"
@@ -1518,7 +1518,7 @@
             "description": "Model name/identifier"
           }
         },
-        "additionalProperties": true,
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "url",
@@ -1597,9 +1597,15 @@
             "format": "date-time",
             "title": "Created At",
             "description": "Request creation timestamp"
+          },
+          "custom": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Custom",
+            "description": "Custom fields for additional request data"
           }
         },
-        "additionalProperties": true,
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "model",
