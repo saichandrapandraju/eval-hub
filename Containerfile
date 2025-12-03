@@ -1,6 +1,8 @@
 # Multi-stage build for the evaluation hub
 FROM registry.access.redhat.com/ubi9/python-312-minimal:latest as builder
 
+USER 0
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -24,6 +26,8 @@ COPY src/ ./src/
 
 # Production stage
 FROM registry.access.redhat.com/ubi9/python-312-minimal:latest as production
+
+USER 0
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
