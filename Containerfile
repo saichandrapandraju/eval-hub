@@ -39,11 +39,9 @@ COPY --from=builder --chown=1001:0 /app/pyproject.toml /app/README.md ./
 # Install the package in production stage
 RUN /opt/app-root/bin/python3 -m pip install -e .
 
-# Set proper ownership and permissions for app directory and create required directories
-RUN chown -R 1001:0 /app && \
-    chmod 755 /app && \
-    mkdir -p /app/logs /app/temp && \
-    chown 1001:0 /app/logs /app/temp && \
+# Create required directories and set permissions
+RUN mkdir -p /app/logs /app/temp && \
+    chmod -R g=u /app && \
     chmod 755 /app/src/eval_hub/data && \
     chmod 644 /app/src/eval_hub/data/providers.yaml
 
