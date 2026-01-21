@@ -38,8 +38,11 @@ def client(test_settings):
 class TestRoutesErrorHandling:
     """Test error handling paths in API routes."""
 
+    @pytest.mark.skip(
+        reason="Benchmark validation removed - any benchmark ID now allowed"
+    )
     def test_create_evaluation_benchmark_not_found(self, client):
-        """Test creating evaluation with non-existent benchmark (without config for non-garak)."""
+        """Test creating evaluation with non-existent benchmark - DISABLED: validation removed."""
         request_data = {
             "model": {"url": "http://test-server:8000", "name": "test-model"},
             "benchmarks": [
@@ -53,20 +56,9 @@ class TestRoutesErrorHandling:
             "experiment": {"name": "Test Error Handling"},
         }
 
-        # Create a properly mocked provider service
+        # Create a mock provider service
         mock_service = MagicMock()
-
-        # Mock provider with correct type
-        mock_provider = Provider(
-            provider_id="lm_evaluation_harness",
-            provider_name="LM Evaluation Harness",
-            description="Test",
-            provider_type=ProviderType.BUILTIN,
-            base_url="http://localhost:8000",
-            benchmarks=[],
-        )
-        mock_service.get_provider_by_id.return_value = mock_provider
-        mock_service.get_benchmark_by_id.return_value = None  # Benchmark not found
+        mock_service.get_benchmark_by_id.return_value = None
 
         # Override the dependency
         from eval_hub.api.routes import get_provider_service
@@ -87,8 +79,10 @@ class TestRoutesErrorHandling:
                     # HTTPException gets caught by generic handler and converted to 500
                     assert response.status_code == 500
                     data = response.json()
-                    assert "not found" in data["detail"].lower()
-                    assert "nonexistent_benchmark" in data["detail"]
+                    assert (
+                        "Benchmark lm_evaluation_harness::nonexistent_benchmark not found"
+                        in data["detail"]
+                    )
         finally:
             # Clean up the override
             client.app.dependency_overrides.clear()
